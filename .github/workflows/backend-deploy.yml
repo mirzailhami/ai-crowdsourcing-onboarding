@@ -1,0 +1,36 @@
+name: Deploy Backend to AWS Elastic Beanstalk
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'backend/**'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: |
+          cd backend
+          pip install -r requirements.txt
+      - name: Package application
+        run: |
+          cd backend
+          zip -r application.zip . -x "*.git*" "*.env*"
+      - name: Deploy to Elastic Beanstalk
+        uses: einaregilsson/beanstalk-deploy@v21
+        with:
+          aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          application_name: challenge-onboarding
+          environment_name: ChallengeOnboardingEnv
+          version_label: ${{ github.sha }}
+          region: us-east-1
+          deployment_package: backend/application.zip

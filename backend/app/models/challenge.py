@@ -1,0 +1,42 @@
+from sqlalchemy import Column, Integer, String, DateTime, Boolean, Float, JSON
+from app.models.base import Base
+import datetime
+
+class Challenge(Base):
+    __tablename__ = "challenges"
+
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String, nullable=False)
+    problem_statement = Column(String, nullable=True)
+    goals = Column(String, nullable=True)
+    challenge_type = Column(String, nullable=True)
+    participant_type = Column(String, nullable=True)
+    geographic_filter = Column(String, nullable=True)
+    language = Column(String, nullable=True)
+    team_participation = Column(Boolean, nullable=True)
+    enable_forums = Column(Boolean, nullable=True)
+    submission_formats = Column(JSON, nullable=True)
+    submission_documentation = Column(JSON, nullable=True)
+    submission_instructions = Column(String, nullable=True)
+    prize_model = Column(String, nullable=True)
+    first_prize = Column(Float, nullable=True)
+    second_prize = Column(Float, nullable=True)
+    third_prize = Column(Float, nullable=True)
+    honorable_mentions = Column(Integer, nullable=True)
+    budget = Column(Float, nullable=True)
+    non_monetary_rewards = Column(String, nullable=True)
+    start_date = Column(DateTime, nullable=True, default=datetime.datetime.utcnow)
+    end_date = Column(DateTime, nullable=True)
+    milestones = Column(JSON, nullable=True)
+    timeline_notes = Column(String, nullable=True)
+    evaluation_model = Column(String, nullable=True)
+    reviewers = Column(JSON, nullable=True)
+    evaluation_criteria = Column(JSON, nullable=True)
+    anonymized_review = Column(Boolean, nullable=True)
+    notification_preferences = Column(JSON, nullable=True)
+    notification_methods = Column(JSON, nullable=True)
+    announcement_template = Column(String, nullable=True)
+    access_level = Column(JSON, nullable=True)
+    success_metrics = Column(String, nullable=True)
+    created_at = Column(DateTime, nullable=False, default=datetime.datetime.utcnow)
+    updated_at = Column(DateTime, nullable=False, default=datetime.datetime.utcnow)

@@ -1,0 +1,52 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:14
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: challenge_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d challenge_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - crowdlaunch-network
+  app:
+    build:
+      context: ./backend
+    ports:
+      - "8000:8000"
+    env_file:
+      - backend/.env.dev
+    environment:
+      - ENVIRONMENT=dev
+      - AWS_REGION=us-east-1
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+    networks:
+      - crowdlaunch-network
+  pgweb:
+    image: sosedoff/pgweb
+    ports:
+      - "8081:8081"
+    environment:
+      - PGWEB_DATABASE_URL=postgres://user:password@db:5432/challenge_db
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - crowdlaunch-network
+networks:
+  crowdlaunch-network:
+    driver: bridge
+volumes:
+  postgres_data:
