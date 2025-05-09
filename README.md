@@ -220,7 +220,6 @@ volumes:
 - **Cost Report**: `docs/cost-coverage-report.md` (Vercel, AWS costs).
 
 ## Notes
-- **AI Ethics**: AI outputs are labeled. No sensitive data is stored without consent.
 - **Dynamic Adaptation**: Challenge updates via `PUT /api/challenges/{id}`.
 - **Forums**: Enabled via `enable_forums` in `challenges` table.
 - **Anonymized Reviews**: Configurable via `anonymized_review` in `challenges` table.
