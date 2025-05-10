@@ -12,10 +12,10 @@ api.interceptors.response.use(
   (error) => {
     console.error("API Error:", error)
     // For development/testing, if there's no backend, return mock success
-    if (error.message === "Network Error" && process.env.NODE_ENV === "development") {
-      console.log("Development mode: Mocking successful API response")
-      return Promise.resolve({ data: { id: Math.floor(Math.random() * 1000) } })
-    }
+    // if (error.message === "Network Error" && process.env.NODE_ENV === "development") {
+    //   console.log("Development mode: Mocking successful API response")
+    //   return Promise.resolve({ data: { id: Math.floor(Math.random() * 1000) } })
+    // }
     return Promise.reject(error)
   },
 )
@@ -25,10 +25,10 @@ const isDevelopment = process.env.NODE_ENV === "development" || !process.env.NEX
 
 export async function createChallenge(data: any) {
   // In development mode, return mock data without making API call
-  if (isDevelopment) {
-    console.log("Development mode: Returning mock challenge data")
-    return { id: Math.floor(Math.random() * 1000) }
-  }
+  // if (isDevelopment) {
+  //   console.log("Development mode: Returning mock challenge data")
+  //   return { id: Math.floor(Math.random() * 1000) }
+  // }
 
   try {
     console.log("Creating challenge with data:", data)
@@ -42,10 +42,10 @@ export async function createChallenge(data: any) {
 
 export async function updateChallenge(id: number, data: any) {
   // In development mode, return mock data without making API call
-  if (isDevelopment) {
-    console.log("Development mode: Returning mock update success")
-    return { id, ...data }
-  }
+  // if (isDevelopment) {
+  //   console.log("Development mode: Returning mock update success")
+  //   return { id, ...data }
+  // }
 
   try {
     console.log(`Updating challenge ${id} with data:`, data)
@@ -59,10 +59,10 @@ export async function updateChallenge(id: number, data: any) {
 
 export async function createHelpRequest(data: any) {
   // In development mode, return mock data without making API call
-  if (isDevelopment) {
-    console.log("Development mode: Returning mock help request success")
-    return { id: Math.floor(Math.random() * 1000), ...data }
-  }
+  // if (isDevelopment) {
+  //   console.log("Development mode: Returning mock help request success")
+  //   return { id: Math.floor(Math.random() * 1000), ...data }
+  // }
 
   try {
     const response = await api.post("/help", data)

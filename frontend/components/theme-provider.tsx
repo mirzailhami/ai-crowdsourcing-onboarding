@@ -1,11 +1,22 @@
-'use client'
+"use client";
 
-import * as React from 'react'
+import * as React from "react";
 import {
   ThemeProvider as NextThemesProvider,
   type ThemeProviderProps,
-} from 'next-themes'
+  useTheme,
+} from "next-themes";
 
 export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
-  return <NextThemesProvider {...props}>{children}</NextThemesProvider>
+  const { setTheme, resolvedTheme } = useTheme();
+
+  // Delay theme application until client is ready
+  React.useEffect(() => {
+    // Ensure theme matches the SSR default after hydration
+    if (resolvedTheme !== "light") {
+      setTheme("light");
+    }
+  }, [resolvedTheme, setTheme]);
+
+  return <NextThemesProvider {...props}>{children}</NextThemesProvider>;
 }

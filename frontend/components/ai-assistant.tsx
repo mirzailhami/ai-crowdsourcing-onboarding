@@ -1,90 +1,89 @@
-"use client"
+"use client";
 
-import type React from "react"
-
-import { useState, useEffect, useCallback, useRef } from "react"
-import { motion, AnimatePresence } from "framer-motion"
-import { Button } from "@/components/ui/button"
-import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card"
-import { Send, Loader2, User, Trash2, Bot, RefreshCw, Clock, ChevronDown, ChevronUp } from "lucide-react"
-import { fetchCopilot, type CopilotRequest } from "@/lib/api"
-import { useLocalStorage } from "@/lib/local-storage"
-import { toast } from "@/hooks/use-toast"
-import { formatDistanceToNow } from "date-fns"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Textarea } from "@/components/ui/textarea"
-import ReactMarkdown from "react-markdown"
-import rehypeRaw from "rehype-raw"
+import type React from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card";
+import { Send, Loader2, User, Trash2, Bot, RefreshCw, Clock, ChevronDown, ChevronUp } from "lucide-react";
+import { fetchCopilot, type CopilotRequest } from "@/lib/api";
+import { useLocalStorage } from "@/lib/local-storage";
+import { toast } from "@/hooks/use-toast";
+import { formatDistanceToNow } from "date-fns";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Textarea } from "@/components/ui/textarea";
+import ReactMarkdown from "react-markdown";
+import rehypeRaw from "rehype-raw";
 
 interface Message {
-  role: "user" | "assistant" | "error"
-  content: string
-  timestamp: string
-  isRetryable?: boolean
-  createdAt: Date
-  suggestions?: string[]
+  role: "user" | "assistant" | "error";
+  content: string;
+  timestamp: string;
+  isRetryable?: boolean;
+  createdAt: Date;
+  suggestions?: string[];
 }
 
 interface AIAssistantProps {
-  currentStep: number
+  currentStep: number;
   formData: {
-    challenge_type?: string
-    title?: string
-    problem_statement?: string
-    goals?: string
-    target_audience?: string
-    enable_forums?: boolean
-    geographic_filters?: string
-    participant_skills?: string
-    diversity_goals?: string
-    submission_formats?: string
-    required_docs?: string
-    instructions?: string
-    allow_video_submissions?: boolean
-    prize_structure?: string
-    non_monetary_rewards?: string
-    budget?: number
-    tiered_prizes?: boolean
-    sponsorship_ideas?: string
-    milestones?: string
-    timeline?: string
-    key_dates?: string
-    submission_deadline?: string
-    buffer_time?: string
-    evaluation_criteria?: string
-    anonymous_judging?: boolean
-    number_of_judges?: number
-    scoring_rubrics?: string
-    tie_handling?: string
-    key_metrics?: string
-    success_measures?: string
-    notification_settings?: string
-    dispute_handling?: string
-    update_frequency?: string
-  }
+    challenge_type?: string;
+    title?: string;
+    problem_statement?: string;
+    goals?: string;
+    target_audience?: string;
+    enable_forums?: boolean;
+    geographic_filters?: string;
+    participant_skills?: string;
+    diversity_goals?: string;
+    submission_formats?: string;
+    required_docs?: string;
+    instructions?: string;
+    allow_video_submissions?: boolean;
+    prize_structure?: string;
+    non_monetary_rewards?: string;
+    budget?: number;
+    tiered_prizes?: boolean;
+    sponsorship_ideas?: string;
+    milestones?: string;
+    timeline?: string;
+    key_dates?: string;
+    submission_deadline?: string;
+    buffer_time?: string;
+    evaluation_criteria?: string;
+    anonymous_judging?: boolean;
+    number_of_judges?: number;
+    scoring_rubrics?: string;
+    tie_handling?: string;
+    key_metrics?: string;
+    success_measures?: string;
+    notification_settings?: string;
+    dispute_handling?: string;
+    update_frequency?: string;
+  };
   currentFormValues: {
-    challenge_type?: string
-    title?: string
-    problem_statement?: string
-    goals?: string
-    participant_type?: string
-    geographic_filter?: string
-    language?: string
-    submission_formats?: string[]
-    submission_documentation?: string[]
-    submission_instructions?: string
-    prize_model?: string
-    budget?: number
-    start_date?: string | Date
-    end_date?: string | Date
-    evaluation_model?: string
-    reviewers?: string[]
-    evaluation_criteria?: string[]
-    notification_preferences?: string[]
-    notification_methods?: string[]
-    access_level?: string[]
-  }
-  onRequestSupport: () => void
+    challenge_type?: string;
+    title?: string;
+    problem_statement?: string;
+    goals?: string;
+    participant_type?: string;
+    geographic_filter?: string;
+    language?: string;
+    submission_formats?: string[];
+    submission_documentation?: string[];
+    submission_instructions?: string;
+    prize_model?: string;
+    budget?: number;
+    start_date?: string | Date;
+    end_date?: string | Date;
+    evaluation_model?: string;
+    reviewers?: string[];
+    evaluation_criteria?: string[];
+    notification_preferences?: string[];
+    notification_methods?: string[];
+    access_level?: string[];
+  };
+  onRequestSupport: () => void;
 }
 
 const suggestionsByStep: { [key: number]: string[] } = {
@@ -101,7 +100,7 @@ const suggestionsByStep: { [key: number]: string[] } = {
   5: ["Milestones", "Timeline suggestions", "Key dates", "Submission time", "Buffer time"],
   6: ["Evaluation criteria", "Anonymous judging?", "Number of judges", "Scoring rubrics", "Handle ties"],
   7: ["Key metrics", "Measure success", "Notifications", "Handle disputes", "Send updates"],
-}
+};
 
 export function AIAssistant({ currentStep, formData, currentFormValues, onRequestSupport }: AIAssistantProps) {
   const [messages, setMessages] = useLocalStorage<Message[]>(`crowdlaunch:chat-step${currentStep}`, [
@@ -111,37 +110,47 @@ export function AIAssistant({ currentStep, formData, currentFormValues, onReques
       timestamp: new Date().toISOString(),
       createdAt: new Date(),
     },
-  ])
-  const [input, setInput] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
-  const [suggestions, setSuggestions] = useState<string[]>([])
+  ]);
+  const [input, setInput] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [suggestions, setSuggestions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useLocalStorage<boolean>(
     `crowdlaunch:suggestions-step${currentStep}`,
     true,
-  )
-  const messagesEndRef = useRef<HTMLDivElement>(null)
-  const textareaRef = useRef<HTMLTextAreaElement>(null)
-  const suggestionsScrollRef = useRef<HTMLDivElement>(null)
-  const isSuggestionDragging = useRef(false)
-  const startX = useRef(0)
-  const scrollLeft = useRef(0)
+  );
+  const [formattedTimestamps, setFormattedTimestamps] = useState<Map<string, string>>(new Map()); // New state for timestamps
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const suggestionsScrollRef = useRef<HTMLDivElement>(null);
+  const isSuggestionDragging = useRef(false);
+  const startX = useRef(0);
+  const scrollLeft = useRef(0);
 
   const formatTimeAgo = (date: Date) => {
-    const distance = formatDistanceToNow(date, { addSuffix: true })
+    const distance = formatDistanceToNow(date, { addSuffix: true });
     return distance
       .replace("about ", "")
       .replace("less than a minute ago", "just now")
       .replace(" minute ago", " min ago")
       .replace(" minutes ago", " mins ago")
       .replace(" hour ago", " hr ago")
-      .replace(" hours ago", " hrs ago")
-  }
+      .replace(" hours ago", " hrs ago");
+  };
+
+  // Compute timestamps on the client only
+  useEffect(() => {
+    const newTimestamps = new Map<string, string>();
+    messages.forEach((msg) => {
+      const timestamp = formatTimeAgo(new Date(msg.timestamp));
+      newTimestamps.set(msg.timestamp, timestamp);
+    });
+    setFormattedTimestamps(newTimestamps);
+  }, [messages]);
 
   const fetchResponse = useCallback(
     async (userInput: string) => {
       setIsLoading(true);
       try {
-        // Define step-specific form data fields using currentFormValues
         const stepFormData: { [key: number]: { [key: string]: any } } = {
           1: {
             challenge_type: currentFormValues.challenge_type || formData.challenge_type,
@@ -177,7 +186,7 @@ export function AIAssistant({ currentStep, formData, currentFormValues, onReques
             timeline_notes: formData.timeline,
           },
           6: {
-            evaluation_model: currentFormValues.evaluation_model || formData.evaluation_model || 'post',
+            evaluation_model: currentFormValues.evaluation_model || formData.evaluation_model || "post",
             reviewers: currentFormValues.reviewers || formData.reviewers || [],
             evaluation_criteria: currentFormValues.evaluation_criteria || formData.evaluation_criteria,
             anonymized_review: formData.anonymous_judging,
@@ -185,13 +194,12 @@ export function AIAssistant({ currentStep, formData, currentFormValues, onReques
           7: {
             notification_preferences: currentFormValues.notification_preferences || formData.notification_settings,
             notification_methods: currentFormValues.notification_methods || formData.notification_methods || [],
-            announcement_template: currentFormValues.announcement_template || formData.announcement_template || '',
+            announcement_template: currentFormValues.announcement_template || formData.announcement_template || "",
             access_level: currentFormValues.access_level || formData.access_level || [],
             success_metrics: formData.success_measures,
           },
         };
 
-        // Aggregate form data from step 1 up to the current step
         const relevantFormData: { [key: string]: any } = {};
         for (let step = 1; step <= currentStep; step++) {
           if (stepFormData[step]) {
@@ -242,24 +250,23 @@ export function AIAssistant({ currentStep, formData, currentFormValues, onReques
   );
 
   const handleSend = async () => {
-    if (!input.trim()) return
-    await fetchResponse(input)
-    setInput("")
+    if (!input.trim()) return;
+    await fetchResponse(input);
+    setInput("");
     if (textareaRef.current) {
-      textareaRef.current.style.height = "auto"
+      textareaRef.current.style.height = "auto";
     }
-  }
+  };
 
   const handleSuggestion = async (suggestion: string) => {
-    // Don't handle suggestion clicks when dragging
-    if (isSuggestionDragging.current) return
-    await fetchResponse(suggestion)
-  }
+    if (isSuggestionDragging.current) return;
+    await fetchResponse(suggestion);
+  };
 
   const handleRetry = async (content: string) => {
-    const userInput = content.replace("Error: ", "").replace(". Click to retry.", "")
-    await fetchResponse(userInput)
-  }
+    const userInput = content.replace("Error: ", "").replace(". Click to retry.", "");
+    await fetchResponse(userInput);
+  };
 
   const handleClearChat = () => {
     setMessages([
@@ -269,69 +276,55 @@ export function AIAssistant({ currentStep, formData, currentFormValues, onReques
         timestamp: new Date().toISOString(),
         createdAt: new Date(),
       },
-    ])
-  }
+    ]);
+  };
 
   const toggleSuggestions = () => {
-    setShowSuggestions((prev) => !prev)
-  }
+    setShowSuggestions((prev) => !prev);
+  };
 
   const shuffleArray = (array: string[]) => {
-    const newArray = [...array]
+    const newArray = [...array];
     for (let i = newArray.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1))
-        ;[newArray[i], newArray[j]] = [newArray[j], newArray[i]]
+      const j = Math.floor(Math.random() * (i + 1));
+      [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
     }
-    return newArray
-  }
+    return newArray;
+  };
 
   const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setInput(e.target.value)
-    // Auto-resize without showing scrollbar
-    e.target.style.height = "auto"
-    e.target.style.height = `${Math.min(e.target.scrollHeight, 150)}px`
-    e.target.style.overflowY = "hidden"
-  }
+    setInput(e.target.value);
+    e.target.style.height = "auto";
+    e.target.style.height = `${Math.min(e.target.scrollHeight, 150)}px`;
+    e.target.style.overflowY = "hidden";
+  };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault()
-      handleSend()
+      e.preventDefault();
+      handleSend();
     }
-  }
+  };
 
-  // Improved suggestion scrolling with simpler and more robust approach
-  const scrollSuggestions = (direction: 'left' | 'right') => {
+  const scrollSuggestions = (direction: "left" | "right") => {
     if (!suggestionsScrollRef.current) return;
 
-    const scrollAmount = 200; // Adjust scroll amount as needed
+    const scrollAmount = 200;
     const currentScroll = suggestionsScrollRef.current.scrollLeft;
 
-    if (direction === 'left') {
+    if (direction === "left") {
       suggestionsScrollRef.current.scrollTo({
         left: currentScroll - scrollAmount,
-        behavior: 'smooth'
+        behavior: "smooth",
       });
     } else {
       suggestionsScrollRef.current.scrollTo({
         left: currentScroll + scrollAmount,
-        behavior: 'smooth'
+        behavior: "smooth",
       });
     }
-  }
+  };
 
-  // Simple wheel event handler for horizontal scrolling
-  const handleSuggestionWheel = (e: React.WheelEvent) => {
-    if (!suggestionsScrollRef.current) return;
-
-    // Prevent default to avoid page scroll
-    e.preventDefault();
-
-    // Use deltaY for horizontal scrolling
-    suggestionsScrollRef.current.scrollLeft += e.deltaY;
-  }
-
-  // Mouse drag scrolling (simplified implementation)
   const handleSuggestionMouseDown = (e: React.MouseEvent) => {
     if (!suggestionsScrollRef.current) return;
 
@@ -339,45 +332,41 @@ export function AIAssistant({ currentStep, formData, currentFormValues, onReques
     startX.current = e.clientX;
     scrollLeft.current = suggestionsScrollRef.current.scrollLeft;
 
-    // Apply styling
-    document.body.style.userSelect = 'none';
-    suggestionsScrollRef.current.style.cursor = 'grabbing';
-  }
+    document.body.style.userSelect = "none";
+    suggestionsScrollRef.current.style.cursor = "grabbing";
+  };
 
   const handleSuggestionMouseMove = (e: React.MouseEvent) => {
     if (!isSuggestionDragging.current || !suggestionsScrollRef.current) return;
 
     const dx = e.clientX - startX.current;
     suggestionsScrollRef.current.scrollLeft = scrollLeft.current - dx;
-  }
+  };
 
   const handleSuggestionMouseUp = () => {
     isSuggestionDragging.current = false;
 
-    // Reset styling
-    document.body.style.userSelect = '';
+    document.body.style.userSelect = "";
     if (suggestionsScrollRef.current) {
-      suggestionsScrollRef.current.style.cursor = 'grab';
+      suggestionsScrollRef.current.style.cursor = "grab";
     }
 
-    // Add a small delay before allowing clicks to prevent accidental suggestions selection
     setTimeout(() => {
       isSuggestionDragging.current = false;
     }, 50);
-  }
+  };
 
   const handleSuggestionMouseLeave = handleSuggestionMouseUp;
 
   useEffect(() => {
-    const stepSuggestions = suggestionsByStep[currentStep] || []
-    setSuggestions(shuffleArray(stepSuggestions).slice(0, 5))
-  }, [currentStep])
+    const stepSuggestions = suggestionsByStep[currentStep] || [];
+    setSuggestions(shuffleArray(stepSuggestions).slice(0, 5));
+  }, [currentStep]);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
-  }, [messages])
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
-  // Custom components for ReactMarkdown to apply Tailwind classes
   const markdownComponents = {
     p: ({ node, ...props }) => <p className="text-sm text-gray-800 mb-2" {...props} />,
     h1: ({ node, ...props }) => <h1 className="text-xl font-semibold text-gray-800 mb-2" {...props} />,
@@ -386,7 +375,7 @@ export function AIAssistant({ currentStep, formData, currentFormValues, onReques
     ul: ({ node, ...props }) => <ul className="list-disc list-inside text-sm text-gray-800 mb-2" {...props} />,
     ol: ({ node, ...props }) => <ol className="list-decimal list-inside text-sm text-gray-800 mb-2" {...props} />,
     li: ({ node, ...props }) => <li className="text-sm text-gray-800" {...props} />,
-  }
+  };
 
   return (
     <div className="w-full max-w-3xl mx-auto flex flex-col gap-4">
@@ -458,8 +447,8 @@ export function AIAssistant({ currentStep, formData, currentFormValues, onReques
                 ) : (
                   <div
                     className={`w-full ${msg.role === "user"
-                      ? "rounded-xl px-4 py-2 bg-gradient-to-br from-blue-600 to-blue-400 text-white shadow-md"
-                      : ""
+                        ? "rounded-xl px-4 py-2 bg-gradient-to-br from-blue-600 to-blue-400 text-white shadow-md"
+                        : ""
                       }`}
                   >
                     <div className="flex-1 min-w-0">
@@ -490,7 +479,7 @@ export function AIAssistant({ currentStep, formData, currentFormValues, onReques
                       )}
                       <p className="text-xs flex items-center gap-1 opacity-50">
                         <Clock className="h-3 w-3" />
-                        {formatTimeAgo(new Date(msg.timestamp))}
+                        {formattedTimestamps.get(msg.timestamp) || "Loading..."}
                       </p>
                     </div>
                   </div>
@@ -516,18 +505,17 @@ export function AIAssistant({ currentStep, formData, currentFormValues, onReques
           <div ref={messagesEndRef} />
         </CardContent>
 
-        <CardFooter className="p-0 border-t flex flex-col overflow-hidden bg-gradient-to-r from-gray-50 to-blue-50 rounded-b-2xl">
+        <CardFooter className="p-0 border-t flex flex-col bg-gradient-to-r from-gray-50 to-blue-50 rounded-b-2xl">
           {showSuggestions && suggestions.length > 0 && (
             <div className="px-2 py-2 border-b relative">
-              <div className="flex items-center">
+              <div className="flex overflow-auto scrollable-hide">
                 <div
                   ref={suggestionsScrollRef}
-                  className="overflow-hidden scrollbar-hide cursor-grab active:cursor-grabbing flex-1 mx-1"
+                  className="cursor-grab active:cursor-grabbing flex-1 mx-1"
                   onMouseDown={handleSuggestionMouseDown}
                   onMouseMove={handleSuggestionMouseMove}
                   onMouseUp={handleSuggestionMouseUp}
                   onMouseLeave={handleSuggestionMouseLeave}
-                  onWheel={handleSuggestionWheel}
                 >
                   <div className="flex gap-2 w-max">
                     {suggestions.map((suggestion, index) => (
@@ -537,8 +525,7 @@ export function AIAssistant({ currentStep, formData, currentFormValues, onReques
                         size="sm"
                         onClick={() => handleSuggestion(suggestion)}
                         disabled={isLoading}
-                        className="flex-shrink-0 rounded-full h-8 text-xs font-medium px-4 whitespace-nowrap 
-                          border-gray-300 bg-white hover:bg-gray-100 transition-colors shadow-sm"
+                        className="flex-shrink-0 rounded-full h-8 text-xs font-medium px-4 whitespace-nowrap border-gray-300 bg-white hover:bg-gray-100 transition-colors shadow-sm"
                       >
                         {suggestion}
                       </Button>
@@ -552,27 +539,24 @@ export function AIAssistant({ currentStep, formData, currentFormValues, onReques
           )}
 
           <div className="p-4 relative w-full">
-            <div className="relative shadow-sm rounded-full border-gray-300 
-                  focus:ring-2 focus:ring-blue-500 focus:border-blue-300 text-gray-800">
+            <div className="relative shadow-sm rounded-full border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-300 text-gray-800">
               <Textarea
                 ref={textareaRef}
                 value={input}
                 onChange={handleTextareaChange}
                 onKeyDown={handleKeyDown}
                 placeholder="Ask the AI anything..."
-                className="w-full pr-12 background-none min-h-[48px] max-h-[150px] resize-none placeholder-gray-400 
-                  overflow-hidden"
+                className="w-full pr-12 background-none min-h-[48px] max-h-[150px] resize-none placeholder-gray-400 overflow-hidden"
                 disabled={isLoading}
                 rows={1}
-                style={{ overflowY: 'hidden' }}
+                style={{ overflowY: "hidden" }}
               />
               <Button
                 type="button"
                 size="icon"
                 onClick={handleSend}
                 disabled={isLoading || !input.trim()}
-                className="absolute right-3 bottom-2 h-8 w-8 rounded-full bg-blue-500 hover:bg-blue-600 
-                  text-white transition-colors shadow-md"
+                className="absolute right-3 bottom-2 h-8 w-8 rounded-full bg-blue-500 hover:bg-blue-600 text-white transition-colors shadow-md"
                 aria-label="Send message"
               >
                 {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
@@ -593,5 +577,5 @@ export function AIAssistant({ currentStep, formData, currentFormValues, onReques
         </CardFooter>
       </Card>
     </div>
-  )
+  );
 }
