@@ -1,20 +1,22 @@
-"use client"
-import { FormField, FormItem, FormControl, FormLabel, FormMessage } from "@/components/ui/form"
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Switch } from "@/components/ui/switch"
-import { Button } from "@/components/ui/button"
-import { FormFieldWrapper } from "@/components/form-field-wrapper"
-import { FormTooltip } from "@/components/form-tooltip"
-import type { UseFormReturn } from "react-hook-form"
-import type { z } from "zod"
-import type { step6Schema } from "@/lib/onboarding-schemas"
-import { Plus, Trash2 } from "lucide-react"
+"use client";
+
+import { useEffect } from "react";
+import { FormField, FormItem, FormControl, FormLabel, FormMessage } from "@/components/ui/form";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Button } from "@/components/ui/button";
+import { FormFieldWrapper } from "@/components/form-field-wrapper";
+import { FormTooltip } from "@/components/form-tooltip";
+import type { UseFormReturn } from "react-hook-form";
+import type { z } from "zod";
+import type { step6Schema } from "@/lib/onboarding-schemas";
+import { Plus, Trash2 } from "lucide-react";
 
 interface Step6FormProps {
-  form: UseFormReturn<z.infer<typeof step6Schema>>
+  form: UseFormReturn<z.infer<typeof step6Schema>>;
 }
 
 export function Step6Form({ form }: Step6FormProps) {
@@ -22,20 +24,36 @@ export function Step6Form({ form }: Step6FormProps) {
     { id: "internal", label: "Internal Team Members" },
     { id: "external", label: "External Subject Matter Experts" },
     { id: "community", label: "Community Reviewers" },
-  ]
+  ];
 
-  const evaluationCriteria = form.watch("evaluation_criteria")
+  // Get evaluation_criteria from form, with a fallback to empty array
+  const evaluationCriteria = form.watch("evaluation_criteria") || [];
 
+  // Add evaluation criterion without directly modifying the form state
   const addCriterion = () => {
-    form.setValue("evaluation_criteria", [...evaluationCriteria, { name: "", weight: "", description: "" }])
-  }
+    const currentCriteria = [...(form.getValues("evaluation_criteria") || [])];
+    form.setValue("evaluation_criteria", [...currentCriteria, { name: "", weight: "", description: "" }], {
+      shouldValidate: true,
+    });
+  };
 
+  // Remove evaluation criterion without directly modifying the form state
   const removeCriterion = (index: number) => {
+    const currentCriteria = [...(form.getValues("evaluation_criteria") || [])];
     form.setValue(
       "evaluation_criteria",
-      evaluationCriteria.filter((_, i) => i !== index),
-    )
-  }
+      currentCriteria.filter((_, i) => i !== index),
+      { shouldValidate: true },
+    );
+  };
+
+  // Initialize evaluation_criteria if undefined
+  useEffect(() => {
+    const currentCriteria = form.getValues("evaluation_criteria");
+    if (!currentCriteria || !Array.isArray(currentCriteria)) {
+      form.setValue("evaluation_criteria", []);
+    }
+  }, [form]);
 
   return (
     <Card>
@@ -80,11 +98,11 @@ export function Step6Form({ form }: Step6FormProps) {
                         <Checkbox
                           checked={field.value?.includes(item.id)}
                           onCheckedChange={(checked) => {
-                            const currentValue = field.value || []
+                            const currentValue = field.value || [];
                             const newValue = checked
                               ? [...currentValue, item.id]
-                              : currentValue.filter((value: string) => value !== item.id)
-                            field.onChange(newValue)
+                              : currentValue.filter((value: string) => value !== item.id);
+                            field.onChange(newValue);
                           }}
                         />
                       </FormControl>
@@ -104,49 +122,50 @@ export function Step6Form({ form }: Step6FormProps) {
             <FormItem>
               <FormFieldWrapper label="Evaluation Criteria" tooltip="Define criteria for judging submissions" required>
                 <div className="space-y-4">
-                  {evaluationCriteria?.map((criterion: any, index: number) => (
-                    <div key={index} className="flex items-center gap-4 border p-4 rounded-lg">
-                      <FormField
-                        control={form.control}
-                        name={`evaluation_criteria.${index}.name`}
-                        render={({ field }) => (
-                          <FormItem className="flex-1">
-                            <FormControl>
-                              <Input placeholder="Criterion name" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name={`evaluation_criteria.${index}.weight`}
-                        render={({ field }) => (
-                          <FormItem className="w-[100px]">
-                            <FormControl>
-                              <Input placeholder="Weight (%)" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name={`evaluation_criteria.${index}.description`}
-                        render={({ field }) => (
-                          <FormItem className="flex-1">
-                            <FormControl>
-                              <Input placeholder="Description" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <Button variant="destructive" size="icon" onClick={() => removeCriterion(index)}>
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  ))}
+                  {Array.isArray(evaluationCriteria) &&
+                    evaluationCriteria.map((criterion: any, index: number) => (
+                      <div key={index} className="flex items-center gap-4 border p-4 rounded-lg">
+                        <FormField
+                          control={form.control}
+                          name={`evaluation_criteria.${index}.name`}
+                          render={({ field }) => (
+                            <FormItem className="flex-1">
+                              <FormControl>
+                                <Input placeholder="Criterion name" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name={`evaluation_criteria.${index}.weight`}
+                          render={({ field }) => (
+                            <FormItem className="w-[100px]">
+                              <FormControl>
+                                <Input placeholder="Weight (%)" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name={`evaluation_criteria.${index}.description`}
+                          render={({ field }) => (
+                            <FormItem className="flex-1">
+                              <FormControl>
+                                <Input placeholder="Description" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <Button variant="destructive" size="icon" onClick={() => removeCriterion(index)}>
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
                   <Button type="button" variant="outline" onClick={addCriterion}>
                     <Plus className="mr-2 h-4 w-4" />
                     Add Criterion
@@ -176,5 +195,5 @@ export function Step6Form({ form }: Step6FormProps) {
         />
       </CardContent>
     </Card>
-  )
+  );
 }

@@ -1,11 +1,17 @@
-from pydantic import BaseModel
+# schemas/challenge.py
+from pydantic import BaseModel, validator
 from typing import Optional, List, Dict, Any
 from datetime import datetime
 
 class Milestone(BaseModel):
     enabled: bool
     name: str
-    date: Optional[datetime] = None
+    date: Optional[str] = None
+
+    class Config:
+        json_encoders = {
+            datetime: lambda v: v.isoformat() if v else None,
+        }
 
 class EvaluationCriterion(BaseModel):
     name: str
@@ -32,8 +38,8 @@ class ChallengeBase(BaseModel):
     honorable_mentions: Optional[int] = None
     budget: Optional[float] = None
     non_monetary_rewards: Optional[str] = None
-    start_date: Optional[datetime] = None
-    end_date: Optional[datetime] = None
+    start_date: Optional[str] = None
+    end_date: Optional[str] = None
     milestones: Optional[List[Milestone]] = None
     timeline_notes: Optional[str] = None
     evaluation_model: Optional[str] = None
@@ -45,6 +51,11 @@ class ChallengeBase(BaseModel):
     announcement_template: Optional[str] = None
     access_level: Optional[List[str]] = None
     success_metrics: Optional[str] = None
+
+    class Config:
+        json_encoders = {
+            datetime: lambda v: v.isoformat() if v else None,
+        }
 
 class ChallengeCreate(ChallengeBase):
     title: str  # Required for creation
@@ -59,3 +70,6 @@ class Challenge(ChallengeBase):
 
     class Config:
         from_attributes = True
+        json_encoders = {
+            datetime: lambda v: v.isoformat() if v else None,
+        }

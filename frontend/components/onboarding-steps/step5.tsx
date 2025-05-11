@@ -1,61 +1,51 @@
-"use client"
+"use client";
 
-import { Textarea } from "@/components/ui/textarea"
-import { useState, useEffect, useRef } from "react"
-import { FormField, FormItem, FormControl, FormMessage } from "@/components/ui/form"
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
-import { Calendar } from "@/components/ui/calendar"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Switch } from "@/components/ui/switch"
-import { FormFieldWrapper } from "@/components/form-field-wrapper"
-import type { UseFormReturn } from "react-hook-form"
-import type { z } from "zod"
-import type { step5Schema } from "@/lib/onboarding-schemas"
-import { format } from "date-fns"
-import { CalendarIcon, Plus, Trash2 } from "lucide-react"
+import { Textarea } from "@/components/ui/textarea";
+import { useState } from "react";
+import { FormField, FormItem, FormControl, FormMessage } from "@/components/ui/form";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
+import { FormFieldWrapper } from "@/components/form-field-wrapper";
+import type { UseFormReturn } from "react-hook-form";
+import type { z } from "zod";
+import type { step5Schema } from "@/lib/onboarding-schemas";
+import { format } from "date-fns";
+import { CalendarIcon, Plus, Trash2 } from "lucide-react";
 
 interface Step5FormProps {
-  form: UseFormReturn<z.infer<typeof step5Schema>>
+  form: UseFormReturn<z.infer<typeof step5Schema>>;
 }
 
 export function Step5Form({ form }: Step5FormProps) {
-  const [openStartDate, setOpenStartDate] = useState(false)
-  const [openEndDate, setOpenEndDate] = useState(false)
-  const initialRenderRef = useRef(true)
+  const [openStartDate, setOpenStartDate] = useState(false);
+  const [openEndDate, setOpenEndDate] = useState(false);
 
-  // Get milestones from form, with a fallback to empty array
-  const milestones = form.watch("milestones") || []
+  const milestones = form.watch("milestones") || [];
 
-  // Add milestone without directly modifying the form state
   const addMilestone = () => {
-    const currentMilestones = [...(form.getValues("milestones") || [])]
-    form.setValue("milestones", [...currentMilestones, { enabled: false, name: "", date: undefined }], {
-      shouldValidate: true,
-    })
-  }
+    const currentMilestones = [...(form.getValues("milestones") || [])];
+    form.setValue(
+      "milestones",
+      [
+        ...currentMilestones,
+        { enabled: true, name: "New Milestone", date: new Date() }, // Default values to satisfy backend schema
+      ],
+      { shouldValidate: true },
+    );
+  };
 
-  // Remove milestone without directly modifying the form state
   const removeMilestone = (index: number) => {
-    const currentMilestones = [...(form.getValues("milestones") || [])]
+    const currentMilestones = [...(form.getValues("milestones") || [])];
     form.setValue(
       "milestones",
       currentMilestones.filter((_, i) => i !== index),
       { shouldValidate: true },
-    )
-  }
-
-  // Initialize milestones if they're undefined
-  useEffect(() => {
-    if (initialRenderRef.current) {
-      const currentMilestones = form.getValues("milestones")
-      if (!currentMilestones || !Array.isArray(currentMilestones)) {
-        form.setValue("milestones", [])
-      }
-      initialRenderRef.current = false
-    }
-  }, [form])
+    );
+  };
 
   return (
     <Card>
@@ -84,8 +74,9 @@ export function Step5Form({ form }: Step5FormProps) {
                       mode="single"
                       selected={field.value}
                       onSelect={(date) => {
-                        field.onChange(date)
-                        setOpenStartDate(false)
+                        console.log("Selected start_date:", date, "Type:", date instanceof Date ? "Date" : typeof date);
+                        field.onChange(date);
+                        setOpenStartDate(false);
                       }}
                       initialFocus
                     />
@@ -116,8 +107,9 @@ export function Step5Form({ form }: Step5FormProps) {
                       mode="single"
                       selected={field.value}
                       onSelect={(date) => {
-                        field.onChange(date)
-                        setOpenEndDate(false)
+                        console.log("Selected end_date:", date, "Type:", date instanceof Date ? "Date" : typeof date);
+                        field.onChange(date);
+                        setOpenEndDate(false);
                       }}
                       initialFocus
                     />
@@ -146,6 +138,7 @@ export function Step5Form({ form }: Step5FormProps) {
                               <FormControl>
                                 <Switch checked={field.value || false} onCheckedChange={field.onChange} />
                               </FormControl>
+                              <FormMessage />
                             </FormItem>
                           )}
                         />
@@ -157,6 +150,7 @@ export function Step5Form({ form }: Step5FormProps) {
                               <FormControl>
                                 <Input placeholder="Milestone name" {...field} />
                               </FormControl>
+                              <FormMessage />
                             </FormItem>
                           )}
                         />
@@ -168,7 +162,10 @@ export function Step5Form({ form }: Step5FormProps) {
                               <Popover>
                                 <PopoverTrigger asChild>
                                   <FormControl>
-                                    <Button variant="outline" className="w-[150px] justify-start text-left font-normal">
+                                    <Button
+                                      variant="outline"
+                                      className="w-[150px] justify-start text-left font-normal"
+                                    >
                                       <CalendarIcon className="mr-2 h-4 w-4" />
                                       {field.value ? format(field.value, "PPP") : <span>Pick date</span>}
                                     </Button>
@@ -178,11 +175,20 @@ export function Step5Form({ form }: Step5FormProps) {
                                   <Calendar
                                     mode="single"
                                     selected={field.value}
-                                    onSelect={field.onChange}
+                                    onSelect={(date) => {
+                                      console.log(
+                                        `Selected milestones[${index}].date:`,
+                                        date,
+                                        "Type:",
+                                        date instanceof Date ? "Date" : typeof date,
+                                      );
+                                      field.onChange(date);
+                                    }}
                                     initialFocus
                                   />
                                 </PopoverContent>
                               </Popover>
+                              <FormMessage />
                             </FormItem>
                           )}
                         />
@@ -217,5 +223,5 @@ export function Step5Form({ form }: Step5FormProps) {
         />
       </CardContent>
     </Card>
-  )
+  );
 }

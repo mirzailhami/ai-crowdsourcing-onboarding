@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, DateTime, Boolean, Float, JSON
 from app.models.base import Base
-import datetime
+from datetime import datetime, timezone
 
 class Challenge(Base):
     __tablename__ = "challenges"
@@ -25,7 +25,7 @@ class Challenge(Base):
     honorable_mentions = Column(Integer, nullable=True)
     budget = Column(Float, nullable=True)
     non_monetary_rewards = Column(String, nullable=True)
-    start_date = Column(DateTime, nullable=True, default=datetime.datetime.utcnow)
+    start_date = Column(DateTime, nullable=True)
     end_date = Column(DateTime, nullable=True)
     milestones = Column(JSON, nullable=True)
     timeline_notes = Column(String, nullable=True)
@@ -38,5 +38,5 @@ class Challenge(Base):
     announcement_template = Column(String, nullable=True)
     access_level = Column(JSON, nullable=True)
     success_metrics = Column(String, nullable=True)
-    created_at = Column(DateTime, nullable=False, default=datetime.datetime.utcnow)
-    updated_at = Column(DateTime, nullable=False, default=datetime.datetime.utcnow)
+    created_at = Column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
