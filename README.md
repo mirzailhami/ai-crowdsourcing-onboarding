@@ -1,6 +1,6 @@
 # CrowdLaunch: AI-Assisted Challenge Onboarding
 
-**CrowdLaunch** is a web-based, AI-assisted onboarding tool that guides users through launching and monitoring crowdsourced innovation challenges. Built for the **TopCoder challenge**, it simulates a subject matter expert, providing step-by-step guidance, AI-powered recommendations, and best practices from platforms like Topcoder, Wazoku, Kaggle, and HeroX. The tool supports first-time and experienced users with a hybrid experience combining conversational guidance and structured wizard steps.
+**CrowdLaunch** is a web-based, AI-assisted onboarding tool that guides users through launching and monitoring crowdsourced innovation challenges. It simulates a subject matter expert, providing step-by-step guidance, AI-powered recommendations, and best practices from platforms like Topcoder, Wazoku, Kaggle, and HeroX. The tool supports first-time and experienced users with a hybrid experience combining conversational guidance and structured wizard steps.
 
 ## Features
 - **7-Step Onboarding**: Define challenge (title, problem statement, type), set audience, specify submission requirements, configure prizes, set timeline, establish evaluation criteria, and monitor the challenge.
