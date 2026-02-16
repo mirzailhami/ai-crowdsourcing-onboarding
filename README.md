@@ -1,6 +1,50 @@
+<div align="center">
+
 # CrowdLaunch: AI-Assisted Challenge Onboarding
 
-**CrowdLaunch** is a web-based, AI-assisted onboarding tool that guides users through launching and monitoring crowdsourced innovation challenges. It simulates a subject matter expert, providing step-by-step guidance, AI-powered recommendations, and best practices from platforms like Topcoder, Wazoku, Kaggle, and HeroX. The tool supports first-time and experienced users with a hybrid experience combining conversational guidance and structured wizard steps.
+<img src="https://img.shields.io/badge/🥈%202nd%20Prize-Wazoku-silver?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTEyIDJMNCAyMmgxNlYxMnoiIGZpbGw9IiNmZmQiLz48L3N2Zz4=" alt="2nd Prize Winner" width="200"/>
+
+**2nd Prize Winner** – Innocentive (Wazoku) Challenge  
+AI-Driven Crowdsourcing Onboarding  
+[View Official Challenge →](https://challenge-center.community.innocentive.com/challenge/1e64614014024250a46077381762c658)
+
+**MVP / Proof-of-Concept** — AI assistant to improve participant onboarding in crowdsourcing platforms.
+
+[![GitHub stars](https://img.shields.io/github/stars/mirzailhami/ai-crowdsourcing-onboarding?style=flat-square&logo=github)](https://github.com/mirzailhami/ai-crowdsourcing-onboarding/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/mirzailhami/ai-crowdsourcing-onboarding?style=flat-square&logo=github)](https://github.com/mirzailhami/ai-crowdsourcing-onboarding/network/members)
+[![License](https://img.shields.io/github/license/mirzailhami/ai-crowdsourcing-onboarding?style=flat-square)](LICENSE)
+[![Python](https://img.shields.io/badge/Python-3.8+-blue?style=flat-square)](requirements.txt)
+
+**Smarter, faster onboarding** — personalized guidance, compliance checks, and task recommendations powered by AI.
+
+</div>
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Features](#features)
+- [Project Structure](#project-structure)
+- [Prerequisites](#prerequisites)
+- [Running Locally](#running-locally)
+- [Sample Environment Files](#sample-environment-files)
+- [Docker Compose](#docker-compose)
+- [Deployment](#deployment)
+- [Testing](#license)
+- [Deliverables](#deliverables)
+- [Notes](#notes)
+
+## Overview
+**CrowdLaunch** won **2nd prize** in the Innocentive (Wazoku) challenge for AI-Driven Crowdsourcing Onboarding.
+
+This project is a web-based, AI-assisted onboarding tool that guides users through launching and monitoring crowdsourced innovation challenges. It simulates a subject matter expert, providing step-by-step guidance, AI-powered recommendations, and best practices from platforms like Topcoder, Wazoku, Kaggle, and HeroX. The tool supports first-time and experienced users with a hybrid experience combining conversational guidance and structured wizard steps.
+
+It provides an AI-powered assistant that helps new participants:
+- Understand platform rules and expectations
+- Receive personalized task recommendations
+- Complete compliance checks quickly
+- Reduce confusion and drop-off rates
+
+Built as a lightweight Python prototype — easy to integrate or extend.
 
 ## Features
 - **7-Step Onboarding**: Define challenge (title, problem statement, type), set audience, specify submission requirements, configure prizes, set timeline, establish evaluation criteria, and monitor the challenge.
@@ -215,13 +259,19 @@ volumes:
    - Test copilot responses and localStorage persistence.
 
 ## Deliverables
-- **Demo Video**: `docs/demo-video.mp4` (<5 mins, shows onboarding, AI Assistant, help requests, Swagger UI).
-- **User Guide**: `docs/user-guide.md` (usage instructions).
-- **Cost Report**: `docs/cost-coverage-report.md` (Vercel, AWS costs).
+- **Demo Video**: [demo-video.mp4](https://drive.google.com/file/d/1JNLb5a1t-o4PhaSOvWg-yT55v3yXMAoA/view?usp=sharing) (<5 mins, shows onboarding, AI Assistant, help requests, Swagger UI).
+- **User Guide**: [docs/user-guide.md](https://github.com/mirzailhami/ai-crowdsourcing-onboarding/blob/main/docs/user-guide.md) (usage instructions).
+- **Cost Report**: [docs/cost-coverage-report.md](https://github.com/mirzailhami/ai-crowdsourcing-onboarding/blob/main/docs/cost-coverage-report.md) (Vercel, AWS costs).
 
 ## Notes
 - **Dynamic Adaptation**: Challenge updates via `PUT /api/challenges/{id}`.
 - **Forums**: Enabled via `enable_forums` in `challenges` table.
 - **Anonymized Reviews**: Configurable via `anonymized_review` in `challenges` table.
+- For issues, check `backend/debug.log`.
 
-For issues, check `backend/debug.log`.
+## Contributing
+- Contributions welcome! Fork → branch → PR.
+- Please open issues for bugs or feature requests.
+
+## License
+MIT License — see [LICENSE](LICENSE) file for full text.
